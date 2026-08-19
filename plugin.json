@@ -1,0 +1,9 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "agent-plugins-1-0",
+  "version": "1.0.0",
+  "description": "Agent skills describing the CoreMedia Blueprint applications (apps/* in coremedia-blueprints-workspace): purpose, architecture, and how to extend each one.",
+  "repository": "https://github.com/CoreMedia/coremedia-agent-plugins",
+  "license": "UNLICENSED",
+  "keywords": ["coremedia", "blueprint", "cms"]
+}
