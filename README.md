@@ -1,11 +1,11 @@
 # CoreMedia Agent Plugin
 
 This repository is an [Agent Plugin](https://agent-plugins.org) named
-**`agent-plugins-1-0`** (see `plugin.json`). It bundles a set of
+**`coremedia-agent-plugins-1-0`** (see `plugin.json`). It bundles a set of
 [Agent Skills](https://agentskills.io/specification) — one per application
 in the CoreMedia Blueprint workspace (`apps/*` in
 `coremedia-blueprints-workspace`) — so that coding agents can quickly
-understand what each Blueprint app does, how it's structured, and how to
+understand what each Blueprint application does, how it's structured, and how to
 extend it.
 
 Each skill lives under `skills/<app-name>/SKILL.md`, with deeper reference
