@@ -43,4 +43,4 @@ Use 'node -v' to check the node version and 'pnpm -v' to check the pnpm version.
 ## References
 
 - Local spec: `references/specification.md`
-- CMCC docs portal: `../../shared/documentation.md`
+- CMCC docs portal: `../../../shared/documentation.md`
