@@ -62,4 +62,4 @@ avoid embedding backend-specific logic in UI components.
 - Do not implement workflow engine behavior here (`workflow-server`).
 
 ## Documentation
-../../shared/
+- `../../../../shared/documentation.md`
