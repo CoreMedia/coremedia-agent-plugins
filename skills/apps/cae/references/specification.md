@@ -79,4 +79,4 @@ Before changing CAE behavior, verify whether the change belongs in:
 - Do not treat CAE as a headless API; use `headless-server` for that use case.
 
 ## Documentation
-- `../../../shared/documentation.md`
+- `../../../../shared/documentation.md`

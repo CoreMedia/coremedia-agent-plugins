@@ -29,4 +29,4 @@ It is configuration/image packaging, not a Spring Boot runtime service.
 ## References
 
 - Local spec: `references/specification.md`
-- CMCC docs portal: `../../shared/documentation.md`
+- CMCC docs portal: `../../../shared/documentation.md`
