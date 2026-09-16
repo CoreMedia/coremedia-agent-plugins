@@ -11,7 +11,7 @@
       "name": "coremedia-blueprint",
       "description": "CoreMedia blueprint development support — queries live UAPI, Ingest, and CMCC-Service APIs across sandbox, UAT, and prod environments",
       "category": "development",
-      "source": "../"
+      "source": "./"
     }
   ]
 }
