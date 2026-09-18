@@ -13,5 +13,5 @@
 - The way, graphql works was modified. It now knows type inheritance.
 
 ## Implementation
-- Some extensions are offering an additional *Root.java class, which is defining a query root.
-- The queries implementation is defined in the *Root.java class
+- Some extensions are offering an additional java class, which is defining a query root.
+- The queries implementation is defined in the ava class
