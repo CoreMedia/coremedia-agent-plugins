@@ -43,4 +43,5 @@ Studio, CAE/headless delivery, workflows, and feeder pipelines.
 ## References
 
 - Local spec: `references/specification.md`
+- All about doctypes and content model: `references/doctypes.md`
 - CoreMedia docs location: `../../cm-documentation/SKILL.md`

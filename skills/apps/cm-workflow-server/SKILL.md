@@ -35,4 +35,5 @@ workflow process definitions.
 ## References
 
 - Local spec: `references/specification.md`
+- Development spec, always use when user asks for a creation / development task: `references/development.md`
 - CoreMedia docs location: `../../cm-documentation/SKILL.md`

@@ -5,7 +5,7 @@ description: "Use this skill for CoreMedia CMCC-13 Studio frontend work: TypeScr
 
 # Studio Client
 
-In CMCC-13 Blueprint projects, studio-client contains the TypeScript
+In CMCC Blueprint projects, studio-client contains the TypeScript
 applications and shared packages that implement the Studio editorial UI. It is
 managed as a pnpm workspace and talks to `studio-server` APIs.
 

@@ -59,7 +59,3 @@ frontends and preview tooling.
 - Do not implement template-driven HTML rendering here (`cae`).
 - Do not modify repository schema/modeling here (`content-server`).
 
-## CMCC-13 references
-
-- `https://documentation.coremedia.com/cmcc-13/`
-

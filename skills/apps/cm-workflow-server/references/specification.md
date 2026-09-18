@@ -55,9 +55,3 @@ paths end-to-end from Studio interaction to repository state.
 
 - Do not implement Studio UI concerns here (`studio-client`).
 - Do not use workflow-server for repository schema modeling (`content-server`).
-
-## CMCC-13 references
-
-- `https://documentation.coremedia.com/cmcc-13/`
-- `https://documentation.coremedia.com/cmcc-13/artifacts/2512.1/webhelp/workflow-developer-en/content/WorkflowServerConfiguration.html`
-
