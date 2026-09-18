@@ -35,5 +35,5 @@ clients). It has live and preview variants aligned with editorial workflows.
 ## References
 
 - Local spec: `references/specification.md`
-- CoreMedia docs location: `../../cm-documentation/SKILL.md`
+- Everything related to the headless development `references/development.md`
 
