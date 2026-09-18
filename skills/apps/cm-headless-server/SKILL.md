@@ -33,7 +33,27 @@ clients). It has live and preview variants aligned with editorial workflows.
 - Live: `mvn spring-boot:run -Plive`
 
 ## References
-
 - Local spec: `references/specification.md`
 - Everything related to the headless development `references/development.md`
 
+## Development
+### Generic information
+- The headless server is a spring boot application which is used to provide content as json representation.
+- The technology used is graphql.
+- spring-graphql is used.
+- The core implementation is located in the workspace under apps/headless-server/modules/headless-server/headless-server-base
+- The core graphql definition is located in the workspace under apps/headless-server/modules/headless-server/headless-server-base/src/main/resources/content-schema.graphql
+- Extensions can define additional graphql definitions.
+- The implementation is following the document type definitions. Consider to read the skill "cm-content-server"
+- Never change existing extensions, always ask with an option
+
+### Specialties
+- The implementation of graphql is modified in the workspace. It now knows inheritance.
+
+### Implementation
+- Some extensions are offering an additional java class, which is defining a query root.
+- @QueryMapping is always returning a class, which has the implementation for all queries. Check the ContentRootController if available for more details.
+- The queries implementation is defined in a java class which is returned by the @QueryMapping.
+- There is only one @QueryMapping per extension.
+- Do not create any @Qualifier("graphqlSchemaResource") schema resource bindings, it's already present.
+- If necessary, create a "org.springframework.boot.autoconfigure.AutoConfiguration.imports" file for the spring auto-configuration.
