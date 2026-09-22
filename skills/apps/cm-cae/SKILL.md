@@ -39,7 +39,16 @@ renders HTML responses through Blueprint view/controller components.
 - Preview app: `mvn spring-boot:run` from `spring-boot/cae-preview-app`
 - Image build: `mvn -Pdefault-image` (optionally `-Djib.goal=build`)
 
+Before doing any analysis, edits, or suggestions, the agent MUST:
+
+1. Locate and read `development.md` in the current workspace (or the path configured by the user).
+2. Treat `development.md` as highest-priority local project guidance.
+3. If `development.md` is missing or unreadable, stop and ask the user how to proceed.
+4. In the first response, explicitly confirm which `development.md` path was read.
+
+Do not continue with implementation until this step is complete.
+
 ## References
 
 - Local spec: `references/specification.md`
-- CoreMedia docs location: `../../cm-documentation/SKILL.md`
+- For any development tasks always read `references/development.md`

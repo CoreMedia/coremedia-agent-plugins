@@ -26,7 +26,8 @@ The CMCC ingest-server api is used to:
 - The key of the ingest token is called <ENVIRONMENT>_TOKEN, and the value is the token which must be used.
 - The url to the given <ENVIRONMENT> is stored in the .env file, and the key is called <ENVIRONMENT>_URL. The value is the url which must be used.
 - The ingest api is web based, and the token must be passed as Authorization bearer token.
-- The ingest api definition is located in the CoreMedia blueprint workspace in the folder ".cm-ai/cmcc-ingest-api/openapi.yaml"
+- The ingest api definition is located `api/openapi.yaml`
+- The implementation is supporting multi-environment operations in a single call (bulk).
 - Check if a implementation is located under the folder ".cm-ai/cmcc-ingest-api/implementation"
 - If no implementation is present, generate a client of your choice in the mentioned folder. Always implement all methods.
 - You are only allowed to use the client to call endpoints.

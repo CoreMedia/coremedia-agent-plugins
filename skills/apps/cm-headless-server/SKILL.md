@@ -53,7 +53,7 @@ clients). It has live and preview variants aligned with editorial workflows.
 ### Implementation
 - Some extensions are offering an additional java class, which is defining a query root.
 - @QueryMapping is always returning a class, which has the implementation for all queries. Check the ContentRootController if available for more details.
-- The queries implementation is defined in a java class which is returned by the @QueryMapping.
+- The queries implementation is defined in a java class which is returned by the @QueryMapping. Create a standalone class, not a static inner class.
 - There is only one @QueryMapping per extension.
 - Do not create any @Qualifier("graphqlSchemaResource") schema resource bindings, it's already present.
 - If necessary, create a "org.springframework.boot.autoconfigure.AutoConfiguration.imports" file for the spring auto-configuration.
