@@ -1,0 +1,1976 @@
+
+openapi: 3.0.1
+info:
+  title: CMCC Service API
+  version: "0.1"
+servers:
+  - url: https://api.dior.coremedia.cloud
+    description: CMCC-S API server
+paths:
+  /v1/token:
+    post:
+      operationId: createToken
+      description: Provides an expiring authentication token to be used for further
+        API requests
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        uri: arn:aws:apigateway:eu-central-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-central-1:297373782916:function:endpoint_token/invocations
+        passthroughBehavior: when_no_match
+        payloadFormatVersion: "2.0"
+        timeoutInMillis: 30000
+        type: aws_proxy
+      requestBody:
+        description: Token generation request body
+        content:
+          application/json:
+            schema: &a12
+              type: object
+              properties:
+                ttl:
+                  type: integer
+                  description: Time to live in minutes before the token expires.
+                  default: 10
+                  maximum: 1440
+      responses:
+        "200":
+          description: Successful creation of an authentication token.
+          content:
+            application/json:
+              schema: &a11
+                type: object
+                properties:
+                  data:
+                    description: Contains the token and related information
+                    type: object
+                    properties:
+                      token:
+                        description: The JWT
+                        type: string
+                      expires_at:
+                        description: Unix epoch time when the returned token expires
+                        type: integer
+        4XX:
+          description: Client errors
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  body:
+                    type: object
+                    properties:
+                      error:
+                        description: A message that provides further details about the error
+                        type: string
+                      errorCode:
+                        description: The unique error code as integer
+                        type: string
+        5XX:
+          description: Server errors
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  body:
+                    type: object
+                    properties:
+                      error:
+                        description: A message that provides further details about the error
+                        type: string
+                      errorCode:
+                        description: The unique error code as integer
+                        type: string
+      tags:
+        - Identity
+  /v1/environments:
+    get:
+      operationId: getEnvironments
+      description: List all environments the user is permitted to see
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        uri: arn:aws:apigateway:eu-central-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-central-1:297373782916:function:endpoint_environments/invocations
+        passthroughBehavior: when_no_match
+        payloadFormatVersion: "2.0"
+        timeoutInMillis: 30000
+        type: aws_proxy
+      responses:
+        "200":
+          description: Information about the available environments
+          content:
+            application/json:
+              schema: &a14
+                type: object
+                properties:
+                  data:
+                    description: Contains information about the available environments
+                    type: object
+                    properties:
+                      environments:
+                        description: List of environments
+                        type: array
+                        items:
+                          type: string
+        4XX:
+          description: Client errors
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  body:
+                    type: object
+                    properties:
+                      error:
+                        description: A message that provides further details about the error
+                        type: string
+                      errorCode:
+                        description: The unique error code as integer
+                        type: string
+        5XX:
+          description: Server errors
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  body:
+                    type: object
+                    properties:
+                      error:
+                        description: A message that provides further details about the error
+                        type: string
+                      errorCode:
+                        description: The unique error code as integer
+                        type: string
+      tags:
+        - Configuration
+  /v1/environments/{env}/deployments:
+    get:
+      operationId: getDeploymentHistory
+      description: List the history of self-service deployments for the specified
+        environment.
+      parameters:
+        - in: path
+          name: env
+          schema:
+            type: string
+            enum: [ development,uat,uat2,uat3,production ]
+          required: true
+          description: Environment name
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+          required: false
+          description: "Number of deployments being returned (default: 10, maximum: 100)"
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        uri: arn:aws:apigateway:eu-central-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-central-1:297373782916:function:endpoint_environments_deployments_history/invocations
+        passthroughBehavior: when_no_match
+        payloadFormatVersion: "2.0"
+        timeoutInMillis: 30000
+        type: aws_proxy
+      responses:
+        "200":
+          description: Last 10 deployments
+          content:
+            application/json:
+              schema: &a22
+                type: object
+                properties:
+                  data:
+                    description: Container for the historical deployment data
+                    type: object
+                    properties:
+                      deployments:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            environment:
+                              type: string
+                            dockerTag:
+                              type: string
+                              description: Will be 'n/a' if the tag can't be determined.
+                            startDate:
+                              type: string
+                            stopDate:
+                              type: string
+                              description: Will be 0000-00-00T00:00:00Z as long as the deployment is running.
+                            duration:
+                              type: string
+                              description: "Total duration of the deployment. Format: 00h00m00s. Will be 0 as long as the deployment is running."
+                            status:
+                              type: string
+                              enum:
+                                - FAILED
+                                - RUNNING
+                                - SUCCEEDED
+                          example:
+                            id: a1b2c34d-1111-99aa-94e7-6a1c8d5edfdb
+                            environment: development
+                            dockerTag: tag-2307.1_123456
+                            startDate: 2021-11-01T22:07:39Z
+                            stopDate: 2021-11-01T22:17:40Z
+                            duration: 00h:10m:01s
+                            status: SUCCEEDED
+        4XX:
+          description: Client errors
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  body:
+                    type: object
+                    properties:
+                      error:
+                        description: A message that provides further details about the error
+                        type: string
+                      errorCode:
+                        description: The unique error code as integer
+                        type: string
+        5XX:
+          description: Server errors
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  body:
+                    type: object
+                    properties:
+                      error:
+                        description: A message that provides further details about the error
+                        type: string
+                      errorCode:
+                        description: The unique error code as integer
+                        type: string
+      tags:
+        - Deployments
+    post:
+      operationId: triggerDeployment
+      description: Start a self-service deployment for the specified environment.
+      parameters:
+        - in: path
+          name: env
+          schema:
+            type: string
+            enum: [ development,uat,uat2,uat3,production ]
+          required: true
+          description: Environment name
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        uri: arn:aws:apigateway:eu-central-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-central-1:297373782916:function:endpoint_environments_deployments_trigger/invocations
+        passthroughBehavior: when_no_match
+        payloadFormatVersion: "2.0"
+        timeoutInMillis: 30000
+        type: aws_proxy
+      requestBody:
+        description: ""
+        content:
+          application/json:
+            schema: &a18
+              properties:
+                image_tag:
+                  type: string
+                  description: Docker image tag to be deployed.
+                force:
+                  type: boolean
+                  description: Force the deployment even if there is an existing self-service
+                    deployment lock.
+                rollingDeliveryDeployment:
+                  type: boolean
+                  default: true
+                  description: Deploy without delivery downtime
+                client:
+                  type: string
+                  default: Swagger
+                  description: System calling this event
+      responses:
+        "201":
+          description: Information about the triggered deployment
+          content:
+            application/json:
+              schema: &a17
+                type: object
+                properties:
+                  data:
+                    description: Container for the information about the triggered deployment
+                    type: object
+                    properties:
+                      deployment:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                          environment:
+                            type: string
+                          startDate:
+                            type: string
+                    example:
+                      id: a1b2c34d-1111-99aa-94e7-6a1c8d5edfdb
+                      environment: development
+                      startDate: 2021-11-01T22:07:39Z
+        4XX:
+          description: Client errors
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  body:
+                    type: object
+                    properties:
+                      error:
+                        description: A message that provides further details about the error
+                        type: string
+                      errorCode:
+                        description: The unique error code as integer
+                        type: string
+        5XX:
+          description: Server errors
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  body:
+                    type: object
+                    properties:
+                      error:
+                        description: A message that provides further details about the error
+                        type: string
+                      errorCode:
+                        description: The unique error code as integer
+                        type: string
+      tags:
+        - Deployments
+  /v1/environments/{env}/deployments/lock:
+    get:
+      operationId: getLock
+      description: Get current self service deployment lock
+      parameters:
+        - in: path
+          name: env
+          schema:
+            type: string
+            enum: [ development,uat,uat2,uat3,production ]
+          required: true
+          description: Environment name
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        uri: arn:aws:apigateway:eu-central-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-central-1:297373782916:function:endpoint_environments_deployments_lock_get/invocations
+        passthroughBehavior: when_no_match
+        payloadFormatVersion: "2.0"
+        timeoutInMillis: 30000
+        type: aws_proxy
+      responses:
+        "200":
+          description: Show the current self service deployment lock
+          content:
+            application/json:
+              schema: &a24
+                type: object
+                properties:
+                  data:
+                    description: Container for the information about the lock.
+                    type: object
+                    properties:
+                      lock:
+                        type: object
+                        properties:
+                          deploymentId:
+                            type: string
+                          lockReason:
+                            type: string
+                          operatorLock:
+                            type: boolean
+                          message:
+                            type: string
+                          startDate:
+                            type: string
+                        example:
+                          deploymentId: deployment-id
+                          lockReason: Deployment in progress,
+                          operatorLock: false
+                          message: Lock set,
+                          startDate: 2021-11-11T16:53:07Z,
+        4XX:
+          description: Client errors
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  body:
+                    type: object
+                    properties:
+                      error:
+                        description: A message that provides further details about the error
+                        type: string
+                      errorCode:
+                        description: The unique error code as integer
+                        type: string
+        5XX:
+          description: Server errors
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  body:
+                    type: object
+                    properties:
+                      error:
+                        description: A message that provides further details about the error
+                        type: string
+                      errorCode:
+                        description: The unique error code as integer
+                        type: string
+      tags:
+        - Deployments
+  /v1/environments/{env}/deployments/{deployment}:
+    get:
+      operationId: getDeploymentStatus
+      description: Provide the current state of the specified self-service deployment
+        and environment.
+      parameters:
+        - in: path
+          name: env
+          schema:
+            type: string
+            enum: [ development,uat,uat2,uat3,production ]
+          required: true
+          description: Environment name
+        - in: path
+          name: deployment
+          schema:
+            type: string
+          required: true
+          description: The deployment ID of a deployment from the deployment history
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        uri: arn:aws:apigateway:eu-central-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-central-1:297373782916:function:endpoint_environments_deployments_get/invocations
+        passthroughBehavior: when_no_match
+        payloadFormatVersion: "2.0"
+        timeoutInMillis: 30000
+        type: aws_proxy
+      responses:
+        "200":
+          description: Show the status of the deployment
+          content:
+            application/json:
+              schema: &a23
+                type: object
+                properties:
+                  data:
+                    description: Container for the information about the deployment.
+                    type: object
+                    properties:
+                      deployment:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                          environment:
+                            type: string
+                          dockerTag:
+                            type: string
+                            description: Will be 'n/a' if the tag can't be determined.
+                          startDate:
+                            type: string
+                          stopDate:
+                            type: string
+                            description: Will be 0000-00-00T00:00:00Z as long as the deployment is running.
+                          duration:
+                            type: string
+                            description: "Total duration of the execution. Format: 00h00m00s. Will be 0 as long as the deployment is running."
+                          status:
+                            type: string
+                            enum:
+                              - FAILED
+                              - RUNNING
+                              - SUCCEEDED
+                          lock:
+                            type: object
+                            properties:
+                              operatorLock:
+                                type: boolean
+                                description: True if this is an operator lock, or false, if this is a standard
+                                  deployment lock.
+                              lockReason:
+                                type: string
+                                description: The reason why the lock has been set.
+                          failedReasons:
+                            type: array
+                            items:
+                              type: string
+                              description: Reason why deployment failed.
+                        example:
+                          id: 68a70698-f86b-4a5d-808e-08b3477d6005,
+                          environment: development,
+                          dockerTag: tag-2107.1_123456
+                          startDate: 2021-11-11T16:53:07Z,
+                          status: SUCCEEDED,
+                          stopDate: 2021-11-11T17:03:35Z,
+                          duration: 0h:10m:27s
+        4XX:
+          description: Client errors
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  body:
+                    type: object
+                    properties:
+                      error:
+                        description: A message that provides further details about the error
+                        type: string
+                      errorCode:
+                        description: The unique error code as integer
+                        type: string
+        5XX:
+          description: Server errors
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  body:
+                    type: object
+                    properties:
+                      error:
+                        description: A message that provides further details about the error
+                        type: string
+                      errorCode:
+                        description: The unique error code as integer
+                        type: string
+      tags:
+        - Deployments
+  /v1/environments/{env}/deployments/{deployment}/redeploy:
+    post:
+      operationId: triggerRedeployment
+      description: >-
+        Start a self-service deployment with the image tag and properties as
+        defined for the specified self-service deployment and environment.
+
+        See manual for more details.
+      parameters:
+        - in: path
+          name: env
+          schema:
+            type: string
+            enum: [ development,uat,uat2,uat3,production ]
+          required: true
+          description: Environment name
+        - in: path
+          name: deployment
+          schema:
+            type: string
+          required: true
+          description: The deployment ID of a deployment from the deployment history.
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        uri: arn:aws:apigateway:eu-central-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-central-1:297373782916:function:endpoint_environments_deployments_trigger_redeploy/invocations
+        passthroughBehavior: when_no_match
+        payloadFormatVersion: "2.0"
+        timeoutInMillis: 30000
+        type: aws_proxy
+      requestBody:
+        description: ""
+        content:
+          application/json:
+            schema: &a16
+              type: object
+              required:
+                - client
+              properties:
+                force:
+                  type: boolean
+                  default: false
+                  description: Force the deployment even if there is an existing self-service
+                    deployment lock.
+                rollingDeliveryDeployment:
+                  type: boolean
+                  default: true
+                  description: Deploy without delivery downtime.
+                client:
+                  type: string
+                  default: Swagger
+                  description: System calling this event.
+      responses:
+        "201":
+          description: Information about the triggered deployment
+          content:
+            application/json:
+              schema: &a15
+                type: object
+                properties:
+                  data:
+                    description: Container for the information about the triggered deployment
+                    type: object
+                    properties:
+                      deployment:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                          environment:
+                            type: string
+                          startDate:
+                            type: string
+                          redeploymentId:
+                            type: string
+                          redeploymentTimestampInMs:
+                            type: integer
+                        example:
+                          id: a1b2c34d-1111-99aa-94e7-6a1c8d5edfdb
+                          environment: development
+                          startDate: 2021-11-01T22:07:39Z
+        4XX:
+          description: Client errors
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  body:
+                    type: object
+                    properties:
+                      error:
+                        description: A message that provides further details about the error
+                        type: string
+                      errorCode:
+                        description: The unique error code as integer
+                        type: string
+        5XX:
+          description: Server errors
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  body:
+                    type: object
+                    properties:
+                      error:
+                        description: A message that provides further details about the error
+                        type: string
+                      errorCode:
+                        description: The unique error code as integer
+                        type: string
+      tags:
+        - Deployments
+  /v1/environments/{env}/deployments/{deployment}/properties:
+    get:
+      operationId: getProperties
+      description: List the image tag and all explicitly configured non-protected
+        property key-value pairs across all containers for the given
+        self-service deployment and environment.
+      parameters:
+        - in: path
+          name: env
+          schema:
+            type: string
+            enum: [ development,uat,uat2,uat3,production ]
+          required: true
+          description: Environment name
+        - in: path
+          name: deployment
+          schema:
+            type: string
+          required: true
+          description: The deployment ID of a deployment from the deployment history;
+            output properties correspond to the properties activate for the
+            given deployment ID.
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        uri: arn:aws:apigateway:eu-central-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-central-1:297373782916:function:endpoint_environments_deployments_properties_get/invocations
+        passthroughBehavior: when_no_match
+        payloadFormatVersion: "2.0"
+        timeoutInMillis: 30000
+        type: aws_proxy
+      responses:
+        "200":
+          description: List of all configured non-protected property key-value pairs
+            across all containers and the image tag.
+          content:
+            application/json:
+              schema: &a21
+                type: object
+                properties:
+                  data:
+                    description: This object contains objects identified by the environment name
+                      that provide the list of property key-value pairs
+                    type: object
+                    additionalProperties:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          key:
+                            description: Property name
+                            type: string
+                          value:
+                            description: Property value
+                            type: object
+        4XX:
+          description: Client errors
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  body:
+                    type: object
+                    properties:
+                      error:
+                        description: A message that provides further details about the error
+                        type: string
+                      errorCode:
+                        description: The unique error code as integer
+                        type: string
+        5XX:
+          description: Server errors
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  body:
+                    type: object
+                    properties:
+                      error:
+                        description: A message that provides further details about the error
+                        type: string
+                      errorCode:
+                        description: The unique error code as integer
+                        type: string
+      tags:
+        - Deployments
+  /v1/environments/{env}/deployments/{deployment}/properties/restore:
+    post:
+      operationId: restoreProperties
+      description: Restore the image tag and all properties of all containers to the
+        values of the given self-service deployment and environment.
+      parameters:
+        - in: path
+          name: env
+          schema:
+            type: string
+            enum: [ development,uat,uat2,uat3,production ]
+          required: true
+          description: Environment name
+        - in: path
+          name: deployment
+          schema:
+            type: string
+          required: true
+          description: The deployment ID of a deployment from the deployment history; the
+            image tag and container properties of this deployment ID will be
+            restored.
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        uri: arn:aws:apigateway:eu-central-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-central-1:297373782916:function:endpoint_environments_deployments_properties_restore/invocations
+        passthroughBehavior: when_no_match
+        payloadFormatVersion: "2.0"
+        timeoutInMillis: 30000
+        type: aws_proxy
+      requestBody:
+        description: Information about the triggered deployment
+        content:
+          application/json:
+            schema: &a20
+              type: object
+              required:
+                - comment
+              properties:
+                comment:
+                  type: string
+                  description: Comment why you want to rollback properties
+      responses:
+        "200":
+          description: Information about the triggered deployment
+          content:
+            application/json:
+              schema: &a19
+                type: object
+                properties:
+                  data:
+                    description: Container for the information about rolled back state
+                    type: object
+                    properties:
+                      rollback_status:
+                        type: string
+        4XX:
+          description: Client errors
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  body:
+                    type: object
+                    properties:
+                      error:
+                        description: A message that provides further details about the error
+                        type: string
+                      errorCode:
+                        description: The unique error code as integer
+                        type: string
+        5XX:
+          description: Server errors
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  body:
+                    type: object
+                    properties:
+                      error:
+                        description: A message that provides further details about the error
+                        type: string
+                      errorCode:
+                        description: The unique error code as integer
+                        type: string
+      tags:
+        - Deployments
+  /v1/environments/{env}/containers-properties:
+    get:
+      operationId: latestProperties
+      description: List the latest, but not necessarily deployed, image tag and
+        explicitly configured non-protected property key-value pairs across all
+        containers for the given environment.
+      parameters:
+        - in: path
+          name: env
+          schema:
+            type: string
+            enum: [ development,uat,uat2,uat3,production ]
+          required: true
+          description: Environment name
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        uri: arn:aws:apigateway:eu-central-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-central-1:297373782916:function:endpoint_configuration_get_properties_latest/invocations
+        passthroughBehavior: when_no_match
+        payloadFormatVersion: "2.0"
+        timeoutInMillis: 30000
+        type: aws_proxy
+      responses:
+        "200":
+          description: Latest, but not necessarily deployed, image tag and explicitly
+            configured non-protected property key-value pairs across all
+            containers for the given environment.
+          content:
+            application/json:
+              schema: &a13
+                type: object
+                properties:
+                  data:
+                    description: This object contains objects identified by the environment name
+                      that provide the latest configured, but not necessarily
+                      deployed, key-value pairs
+                    type: object
+                    additionalProperties:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          key:
+                            description: Property name
+                            type: string
+                          value:
+                            description: Property value
+                            type: object
+        4XX:
+          description: Client errors
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  body:
+                    type: object
+                    properties:
+                      error:
+                        description: A message that provides further details about the error
+                        type: string
+                      errorCode:
+                        description: The unique error code as integer
+                        type: string
+        5XX:
+          description: Server errors
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  body:
+                    type: object
+                    properties:
+                      error:
+                        description: A message that provides further details about the error
+                        type: string
+                      errorCode:
+                        description: The unique error code as integer
+                        type: string
+      tags:
+        - Configuration
+  /v1/environments/{env}/containers-images:
+    get:
+      operationId: getContainersImagesForEnvironment
+      description: List all available container images that are compatible to the
+        currently running AEP.
+      parameters:
+        - in: path
+          name: env
+          schema:
+            type: string
+            enum: [ development,uat,uat2,uat3,production ]
+          required: true
+          description: Environment name
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        uri: arn:aws:apigateway:eu-central-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-central-1:297373782916:function:endpoint_environments_containers_images/invocations
+        passthroughBehavior: when_no_match
+        payloadFormatVersion: "2.0"
+        timeoutInMillis: 30000
+        type: aws_proxy
+      responses:
+        "200":
+          description: List of available & compatible container images
+          content:
+            application/json:
+              schema: &a25
+                type: object
+                properties:
+                  data:
+                    description: Container for the requested images per environment
+                    type: object
+                    properties:
+                      imageTags:
+                        type: array
+                        items:
+                          type: string
+        4XX:
+          description: Client errors
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  body:
+                    type: object
+                    properties:
+                      error:
+                        description: A message that provides further details about the error
+                        type: string
+                      errorCode:
+                        description: The unique error code as integer
+                        type: string
+        5XX:
+          description: Server errors
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  body:
+                    type: object
+                    properties:
+                      error:
+                        description: A message that provides further details about the error
+                        type: string
+                      errorCode:
+                        description: The unique error code as integer
+                        type: string
+      tags:
+        - Configuration
+  /v1/environments/{env}/containers-configurations:
+    get:
+      operationId: getEnvironmentContainersConfiguration
+      description: |-
+        Provide the Spring Boot configprops for all containers in the specified environment.
+        Changes of configprops may take up to 5 minutes before they are visible in this call.
+        (see https://docs.spring.io/spring-boot/docs/current/actuator-api/htmlsingle/#configprops for details)
+      parameters:
+        - &a7
+          in: path
+          name: env
+          schema:
+            type: string
+            enum: [ development,uat,uat2,uat3,production ]
+          required: true
+          description: Environment name
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        uri: arn:aws:apigateway:eu-central-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-central-1:297373782916:function:endpoint_environments_containers_configurations/invocations
+        passthroughBehavior: when_no_match
+        payloadFormatVersion: "2.0"
+        timeoutInMillis: 30000
+        type: aws_proxy
+      responses:
+        "200":
+          description: Returns all configured Spring Boot configprops in the specified
+            environment.
+          content:
+            application/json:
+              schema: &a27
+                type: object
+                properties:
+                  data:
+                    description: >-
+                      Object that holds individual objects per container and
+                      application.
+
+                      These objects have the same name as the container.
+                    type: object
+                    additionalProperties: &a8
+                      type: object
+                      properties:
+                        contexts:
+                          description: Object that contains an object identified by the spring application
+                            name.
+                          type: object
+                          additionalProperties:
+                            description: Object that contains the applications Spring Boot configprops.
+                            type: object
+        4XX: &a9
+          description: Client errors
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  body:
+                    type: object
+                    properties:
+                      error:
+                        description: A message that provides further details about the error
+                        type: string
+                      errorCode:
+                        description: The unique error code as integer
+                        type: string
+        5XX: &a10
+          description: Server errors
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  body:
+                    type: object
+                    properties:
+                      error:
+                        description: A message that provides further details about the error
+                        type: string
+                      errorCode:
+                        description: The unique error code as integer
+                        type: string
+      tags:
+        - Configuration
+  /v1/environments/{env}/containers:
+    get:
+      operationId: getRunningContainers
+      description: Provide information about the running containers, i.e., the docker
+        tag and deployment date.
+      parameters:
+        - in: path
+          name: env
+          schema:
+            type: string
+            enum: [ development,uat,uat2,uat3,production ]
+          required: true
+          description: Environment name
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        uri: arn:aws:apigateway:eu-central-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-central-1:297373782916:function:endpoint_environments_containers/invocations
+        passthroughBehavior: when_no_match
+        payloadFormatVersion: "2.0"
+        timeoutInMillis: 30000
+        type: aws_proxy
+      responses:
+        "200":
+          description: Information about the deployed container images in the specified
+            environment
+          content:
+            application/json:
+              schema: &a26
+                type: object
+                properties:
+                  data:
+                    description: This object contains objects identified by the container name that
+                      provide additional information
+                    type: object
+                    additionalProperties:
+                      type: object
+                      properties:
+                        deployedDockerTag:
+                          description: Full name of the currently deployed Docker tag
+                          type: string
+                        cmsVersion:
+                          description: Version of the running CMS
+                          type: string
+                        customPrefix:
+                          description: Customer chosen prefix of the currently deployed Docker tag
+                          type: string
+                        gitHash:
+                          description: Short git hash of the commit that was used to build the Docker
+                            images
+                          type: string
+        4XX:
+          description: Client errors
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  body:
+                    type: object
+                    properties:
+                      error:
+                        description: A message that provides further details about the error
+                        type: string
+                      errorCode:
+                        description: The unique error code as integer
+                        type: string
+        5XX:
+          description: Server errors
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  body:
+                    type: object
+                    properties:
+                      error:
+                        description: A message that provides further details about the error
+                        type: string
+                      errorCode:
+                        description: The unique error code as integer
+                        type: string
+      tags:
+        - Configuration
+  /v1/environments/{env}/containers/{container}/properties:
+    get:
+      operationId: getSpecificEnvironmentContainerProperties
+      description: >-
+        List all non-protected property keys for the given CoreMedia container
+        configuration that deviate from
+
+        defaults.
+      parameters:
+        - in: path
+          name: env
+          schema:
+            type: string
+            enum: [ development,uat,uat2,uat3,production ]
+          required: true
+          description: Environment name
+        - in: path
+          name: container
+          schema:
+            type: string
+          required: true
+          description: Name of the container. See /environments/containers for a list of
+            running containers. If a container there has one or more numerals at
+            the end, remove one of those.
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        uri: arn:aws:apigateway:eu-central-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-central-1:297373782916:function:endpoint_configuration_get_all_properties/invocations
+        passthroughBehavior: when_no_match
+        payloadFormatVersion: "2.0"
+        timeoutInMillis: 30000
+        type: aws_proxy
+      responses:
+        "200":
+          description: Provide the value of the given non-protected property key for the
+            given CoreMedia container.
+          content:
+            application/json:
+              schema: &a33
+                type: object
+                properties:
+                  data:
+                    description: Object that contains an object identified by the spring application
+                      name.
+                    type: object
+                    properties:
+                      items:
+                        type: array
+                        items:
+                          type: string
+                          description: the name of the property
+        4XX:
+          description: Client errors
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  body:
+                    type: object
+                    properties:
+                      error:
+                        description: A message that provides further details about the error
+                        type: string
+                      errorCode:
+                        description: The unique error code as integer
+                        type: string
+        5XX:
+          description: Server errors
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  body:
+                    type: object
+                    properties:
+                      error:
+                        description: A message that provides further details about the error
+                        type: string
+                      errorCode:
+                        description: The unique error code as integer
+                        type: string
+      tags:
+        - Configuration
+  /v1/environments/{env}/containers/{container}/properties/history:
+    get:
+      operationId: getSpecificEnvironmentContainerPropertiesHistory
+      description: List the change history of all properties. Sensitive property
+        values (like passwords) will be masked.
+      parameters:
+        - &a2
+          in: path
+          name: env
+          schema:
+            type: string
+            enum: [ development,uat,uat2,uat3,production ]
+          required: true
+          description: Environment name
+        - &a3
+          in: path
+          name: container
+          schema:
+            type: string
+          required: true
+          description: Name of the container. See /environments/containers for a list of
+            running containers. If a container there has one or more numerals at
+            the end, remove one of those.
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 25
+          required: false
+          description: "Number of history items being returned (default: 25, minimum: 1, maximum: 100)"
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        uri: arn:aws:apigateway:eu-central-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-central-1:297373782916:function:endpoint_configuration_get_property_history/invocations
+        passthroughBehavior: when_no_match
+        payloadFormatVersion: "2.0"
+        timeoutInMillis: 30000
+        type: aws_proxy
+      responses:
+        "200":
+          description: List the history of all properties, containing the name, value,
+            user and comment.
+          content:
+            application/json:
+              schema: &a4
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      items:
+                        description: Object that contains a list of the delta items
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            comment:
+                              description: Comment on the property change
+                              type: string
+                            name:
+                              description: Name of the property
+                              type: string
+                            user:
+                              description: User who set the property
+                              type: string
+                            time:
+                              description: Timestamp of the property
+                              type: number
+                            value:
+                              oneOf:
+                                - type: string
+                                - type: number
+        4XX: &a5
+          description: Client errors
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  body:
+                    type: object
+                    properties:
+                      error:
+                        description: A message that provides further details about the error
+                        type: string
+                      errorCode:
+                        description: The unique error code as integer
+                        type: string
+        5XX: &a6
+          description: Server errors
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  body:
+                    type: object
+                    properties:
+                      error:
+                        description: A message that provides further details about the error
+                        type: string
+                      errorCode:
+                        description: The unique error code as integer
+                        type: string
+      tags:
+        - Configuration
+  /v1/environments/{env}/containers/{container}/properties/delta:
+    get:
+      operationId: getSpecificEnvironmentContainerPropertiesDelta
+      description: >-
+        List the difference between the desired configuration and the properties
+        of the currently running container
+
+        (except for commerce adapter). Sensitive property values (like
+        passwords) will be masked
+      parameters:
+        - in: path
+          name: env
+          schema:
+            type: string
+            enum: [ development,uat,uat2,uat3,production ]
+          required: true
+          description: Environment name
+        - in: path
+          name: container
+          schema:
+            type: string
+          required: true
+          description: Name of the container. See /environments/containers for a list of
+            running containers. If a container there has one or more numerals at
+            the end, remove one of those.
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        uri: arn:aws:apigateway:eu-central-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-central-1:297373782916:function:endpoint_configuration_get_properties_delta/invocations
+        passthroughBehavior: when_no_match
+        payloadFormatVersion: "2.0"
+        timeoutInMillis: 30000
+        type: aws_proxy
+      responses:
+        "200":
+          description: Returns the property details.
+          content:
+            application/json:
+              schema: &a32
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      items:
+                        description: Object that contains a list of the delta items
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              description: Name of the property
+                              type: string
+                            running:
+                              description: Value of the property in the running container
+                              type: string
+                            configuration:
+                              description: Value of the property in the current configuration
+                              type: string
+        4XX:
+          description: Client errors
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  body:
+                    type: object
+                    properties:
+                      error:
+                        description: A message that provides further details about the error
+                        type: string
+                      errorCode:
+                        description: The unique error code as integer
+                        type: string
+        5XX:
+          description: Server errors
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  body:
+                    type: object
+                    properties:
+                      error:
+                        description: A message that provides further details about the error
+                        type: string
+                      errorCode:
+                        description: The unique error code as integer
+                        type: string
+      tags:
+        - Configuration
+  /v1/environments/{env}/containers/{container}/properties/{property}:
+    delete:
+      operationId: deleteSpecificEnvironmentContainerProperty
+      description: >-
+        Delete the given property of the given container.
+
+        The property deletion here are not applied yet and will be applied with
+        the next deployment.
+      parameters:
+        - in: path
+          name: env
+          schema:
+            type: string
+            enum: [ development,uat,uat2,uat3,production ]
+          required: true
+          description: Environment name
+        - in: path
+          name: container
+          schema:
+            type: string
+          required: true
+          description: Name of the container. See /environments/containers for a list of
+            running containers. If a container there has one or more numerals at
+            the end, remove one of those.
+        - in: path
+          name: property
+          schema:
+            type: string
+          required: true
+          description: >
+            Name of the property. See
+            environments/{env}/containers/{container}/properties for a list of
+            available properties
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        uri: arn:aws:apigateway:eu-central-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-central-1:297373782916:function:endpoint_configuration_delete_property/invocations
+        passthroughBehavior: when_no_match
+        payloadFormatVersion: "2.0"
+        timeoutInMillis: 30000
+        type: aws_proxy
+      responses:
+        "200":
+          description: The property has been successfully deleted.
+          content:
+            application/json:
+              schema: &a34
+                type: object
+                properties:
+                  data:
+                    description: Object that contains an object identified by the spring application
+                      name.
+                    type: object
+                  message:
+                    description: Status message.
+                    type: string
+        4XX:
+          description: Client errors
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  body:
+                    type: object
+                    properties:
+                      error:
+                        description: A message that provides further details about the error
+                        type: string
+                      errorCode:
+                        description: The unique error code as integer
+                        type: string
+        5XX:
+          description: Server errors
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  body:
+                    type: object
+                    properties:
+                      error:
+                        description: A message that provides further details about the error
+                        type: string
+                      errorCode:
+                        description: The unique error code as integer
+                        type: string
+      tags:
+        - Configuration
+    get:
+      operationId: getSpecificEnvironmentContainerProperty
+      description: >-
+        Provide the details of the requested property. Values returned here are
+        not necessarily applied yet.
+
+        They are configured and will be applied with the next deployment. To see
+        all currently applied configurations,
+
+        see environments/{env}/containers/{container}/configurations. Sensitive
+        property values (like passwords) will
+
+        be masked.
+      parameters:
+        - in: path
+          name: env
+          schema:
+            type: string
+            enum: [ development,uat,uat2,uat3,production ]
+          required: true
+          description: Environment name
+        - in: path
+          name: container
+          schema:
+            type: string
+          required: true
+          description: Name of the container. See /environments/containers for a list of
+            running containers. If a container there has one or more numerals at
+            the end, remove one of those.
+        - in: path
+          name: property
+          schema:
+            type: string
+          required: true
+          description: >
+            Name of the property. See
+            environments/{env}/containers/{container}/properties for a list of
+            available properties
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        uri: arn:aws:apigateway:eu-central-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-central-1:297373782916:function:endpoint_configuration_get_property/invocations
+        passthroughBehavior: when_no_match
+        payloadFormatVersion: "2.0"
+        timeoutInMillis: 30000
+        type: aws_proxy
+      responses:
+        "200":
+          description: Returns the property details.
+          content:
+            application/json:
+              schema: &a31
+                type: object
+                properties:
+                  data:
+                    description: Object that contains an object identified by the spring application
+                      name.
+                    type: object
+                    properties:
+                      item:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            name:
+                              description: The name of the property
+                              type: string
+                            value:
+                              description: The value of the property
+                              type: string
+                            user:
+                              description: The user that last did a change to this property
+                              type: string
+                            comment:
+                              description: The comment for the property
+                              type: string
+        4XX:
+          description: Client errors
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  body:
+                    type: object
+                    properties:
+                      error:
+                        description: A message that provides further details about the error
+                        type: string
+                      errorCode:
+                        description: The unique error code as integer
+                        type: string
+        5XX:
+          description: Server errors
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  body:
+                    type: object
+                    properties:
+                      error:
+                        description: A message that provides further details about the error
+                        type: string
+                      errorCode:
+                        description: The unique error code as integer
+                        type: string
+      tags:
+        - Configuration
+    put:
+      operationId: setSpecificEnvironmentContainerProperty
+      description: >-
+        Update the given property of the given container to the given value and
+        applies the given note.
+
+        If a user tries to set such a property, the operation will be denied.
+
+        The property update are not applied yet and  will be applied with the
+        next deployment.
+      parameters:
+        - in: path
+          name: env
+          schema:
+            type: string
+            enum: [ development,uat,uat2,uat3,production ]
+          required: true
+          description: Environment name
+        - in: path
+          name: container
+          schema:
+            type: string
+          required: true
+          description: Name of the container. See /environments/containers for a list of
+            running containers. If a container there has one or more numerals at
+            the end, remove one of those.
+        - in: path
+          name: property
+          schema:
+            type: string
+          required: true
+          description: >
+            Name of the property. See
+            environments/{env}/containers/{container}/properties for a list of
+            available properties
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        uri: arn:aws:apigateway:eu-central-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-central-1:297373782916:function:endpoint_configuration_set_property/invocations
+        passthroughBehavior: when_no_match
+        payloadFormatVersion: "2.0"
+        timeoutInMillis: 30000
+        type: aws_proxy
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: &a30
+              properties:
+                value:
+                  description: The value
+                  type: string
+                comment:
+                  description: The comment
+                  type: string
+      responses:
+        "200":
+          description: The property configuration has been updated.
+          content:
+            application/json:
+              schema: &a1
+                type: object
+                properties:
+                  data:
+                    description: Object that contains an object identified by the spring application
+                      name.
+                    type: object
+                  message:
+                    description: Status message.
+                    type: string
+        "201":
+          description: The property configuration has been created.
+          content:
+            application/json:
+              schema: *a1
+        4XX:
+          description: Client errors
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  body:
+                    type: object
+                    properties:
+                      error:
+                        description: A message that provides further details about the error
+                        type: string
+                      errorCode:
+                        description: The unique error code as integer
+                        type: string
+        5XX:
+          description: Server errors
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  body:
+                    type: object
+                    properties:
+                      error:
+                        description: A message that provides further details about the error
+                        type: string
+                      errorCode:
+                        description: The unique error code as integer
+                        type: string
+      tags:
+        - Configuration
+  /v1/environments/{env}/containers/{container}/properties/{property}/history:
+    get:
+      operationId: getSpecificEnvironmentContainerPropertyHistory
+      description: List the change history of the requested property. Sensitive
+        property values (like passwords) will be masked.
+      parameters:
+        - *a2
+        - *a3
+        - in: path
+          name: property
+          schema:
+            type: string
+          required: true
+          description: >
+            Name of the property. See
+            environments/{env}/containers/{container}/properties for a list of
+            available properties
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 25
+          required: false
+          description: "Number of history items being returned (default: 25, minimum: 1, maximum: 100)"
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        uri: arn:aws:apigateway:eu-central-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-central-1:297373782916:function:endpoint_configuration_get_property_history/invocations
+        passthroughBehavior: when_no_match
+        payloadFormatVersion: "2.0"
+        timeoutInMillis: 30000
+        type: aws_proxy
+      responses:
+        "200":
+          description: Returns the property details.
+          content:
+            application/json:
+              schema: *a4
+        4XX: *a5
+        5XX: *a6
+      tags:
+        - Configuration
+  /v1/environments/{env}/containers/{container}/configurations:
+    get:
+      operationId: getSpecificEnvironmentContainersConfiguration
+      description: >-
+        Provide the Spring Boot configprops for a container in the specified
+        environment. Changes of configprops may take up to
+
+        5 minutes before they are visible in this call.
+      parameters:
+        - *a7
+        - in: path
+          name: container
+          schema:
+            type: string
+          required: true
+          description: Name of the container. See /environments/containers for a list of
+            running containers. If a container there has one or more numerals at
+            the end, remove one of those.
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        uri: arn:aws:apigateway:eu-central-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-central-1:297373782916:function:endpoint_environments_containers_configurations/invocations
+        passthroughBehavior: when_no_match
+        payloadFormatVersion: "2.0"
+        timeoutInMillis: 30000
+        type: aws_proxy
+      responses:
+        "200":
+          description: Returns all configured Spring Boot configprops for the container in
+            the specified environment
+          content:
+            application/json:
+              schema: *a8
+        4XX: *a9
+        5XX: *a10
+      tags:
+        - Configuration
+  /v1/environments/{env}/cache/commerce/{tier}/{adapter_type}/{adapter_index}/invalidate:
+    post:
+      operationId: invalidateCommerceCache
+      description: >-
+        Schedule an invalidation of commerce items of the given type and id in
+        the cache of the given commerce adapter.
+
+        The invalidation queue will be processed every minute.
+      parameters:
+        - in: path
+          name: env
+          schema:
+            type: string
+            enum: [ development,uat,uat2,uat3,production ]
+          required: true
+          description: Environment name
+        - in: path
+          name: tier
+          schema:
+            type: string
+            enum:
+              - preview
+              - live
+          required: true
+          description: Preview or Live
+        - in: path
+          name: adapter_type
+          schema:
+            type: string
+            enum:
+              - sfcc
+              - wcs
+              - hybris
+              - custom
+          required: true
+          description: Type of commerce adapter. One of "sfcc", "hybris", "wcs" or "custom"
+        - in: path
+          name: adapter_index
+          schema:
+            type: integer
+          required: true
+          description: Index of the commerce adapter.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: &a29
+              properties:
+                commerce_type:
+                  type: string
+                  description: The type of the commerce object to invalidate. If not set, the
+                    entire commerce cache will be invalidated.
+                  enum:
+                    - catalog
+                    - category
+                    - product
+                commerce_id:
+                  type: string
+                  description: The id of the commerce object to invalidate. Will have no effect if
+                    no type was set. If this is not set, all objects of the
+                    given type will be invalidated.
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        uri: arn:aws:apigateway:eu-central-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-central-1:297373782916:function:endpoint_environments_cache_commerce_invalidate/invocations
+        passthroughBehavior: when_no_match
+        payloadFormatVersion: "2.0"
+        timeoutInMillis: 30000
+        type: aws_proxy
+      responses:
+        "200":
+          description: Cache invalidation has successfully been scheduled.
+          content:
+            application/json:
+              schema: &a28
+                type: object
+                properties:
+                  data:
+                    description: This object might contain additional information on the scheduled
+                      invalidation.
+                    type: object
+        4XX:
+          description: Client errors
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  body:
+                    type: object
+                    properties:
+                      error:
+                        description: A message that provides further details about the error
+                        type: string
+                      errorCode:
+                        description: The unique error code as integer
+                        type: string
+        5XX:
+          description: Server errors
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  body:
+                    type: object
+                    properties:
+                      error:
+                        description: A message that provides further details about the error
+                        type: string
+                      errorCode:
+                        description: The unique error code as integer
+                        type: string
+      tags:
+        - Commerce Cache
+security:
+  - bearerAuth:
+      []
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    tokenPostResponse: *a11
+    tokenPostRequest: *a12
+    environmentsLatestPropertiesGetResponse: *a13
+    environmentsGetResponse: *a14
+    environmentsDeploymentsTriggerRedeployPostResponse: *a15
+    environmentsDeploymentsTriggerRedeployPostRequest: *a16
+    environmentsDeploymentsTriggerPostResponse: *a17
+    environmentsDeploymentsTriggerPostRequest: *a18
+    environmentsDeploymentsPropertiesRestorePostResponse: *a19
+    environmentsDeploymentsPropertiesRestorePostRequest: *a20
+    environmentsDeploymentsPropertiesGetResponse: *a21
+    environmentsDeploymentsHistoryGetResponse: *a22
+    environmentsDeploymentsGetResponse: *a23
+    environmentsDeploymentsGetLockResponse: *a24
+    environmentsContainersImagesGetResponse: *a25
+    environmentsContainersGetResponse: *a26
+    environmentsContainersConfigurationsSingleGetResponse: *a8
+    environmentsContainersConfigurationsGetResponse: *a27
+    environmentsCacheCommerceCachePostResponse: *a28
+    environmentsCacheCommerceCachePostRequest: *a29
+    configurationSetPropertyPutResponse: *a1
+    configurationSetPropertyPutRequest: *a30
+    configurationGetPropertyHistoryGetResponse: *a4
+    configurationGetPropertyGetResponse: *a31
+    configurationGetPropertiesDeltaGetResponse: *a32
+    configurationGetAllPropertiesGetResponse: *a33
+    configurationDeletePropertyDeleteResponse: *a34

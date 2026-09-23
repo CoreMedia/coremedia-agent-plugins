@@ -22,7 +22,7 @@ The CMCC service api is used to:
 - Check if a .cm-ai/cmcc-service-api/.env exists.
 - The key of the service token is called SERVICE_API_TOKEN, and the value is the token which must be used.
 - The service api is web based, and the token must be passed as Authorization bearer token.
-- The service api definition is located in the CoreMedia blueprint workspace in the folder ".cm-ai/cmcc-service-api/openapi.yaml"
+- The service api definition is located in the folder `api/openapi.yaml`
 - Check if a implementation is located under the folder ".cm-ai/cmcc-service-api/implementation"
 - If no implementation is present, generate a client of your choice in the mentioned folder. Always implement all methods.
 - Confirm that you created all methods in the client. 
