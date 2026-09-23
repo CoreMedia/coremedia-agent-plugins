@@ -51,3 +51,4 @@ renders HTML responses through Blueprint view/controller components.
 ## References
 
 - Local spec: `references/specification.md`
+- Necessary information about all development tasks `references/development.md`

@@ -1,5 +1,5 @@
 ---
-name: cm-ingest-server
+name: cm-ingest-api
 description: "Use this skill for executing the ingest-server api"
 ---
 

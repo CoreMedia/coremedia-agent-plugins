@@ -1,6 +1,6 @@
 ---
 name: cm-studio-client
-description: "Use this skill for CoreMedia CMCC-13 Studio frontend work: TypeScript workspace structure, pnpm packages, and Studio UI extension wiring."
+description: "Use this skill for CoreMedia CMCC Studio frontend work: TypeScript workspace structure, pnpm packages, and Studio UI extension wiring."
 ---
 
 # Studio Client
@@ -43,4 +43,3 @@ Use 'node -v' to check the node version and 'pnpm -v' to check the pnpm version.
 ## References
 
 - Local spec: `references/specification.md`
-- CoreMedia docs location: `../../cm-documentation/SKILL.md`
