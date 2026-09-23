@@ -3,6 +3,15 @@ name: cm-cae
 description: Use this skill for CoreMedia CMCC-13 CAE work live/preview rendering, page composition, controller/view logic, and CAE extension wiring.
 ---
 
+Before doing any analysis, edits, or suggestions, the agent MUST:
+
+1. Locate and read `development.md` in the current workspace (or the path configured by the user).
+2. Treat `development.md` as highest-priority local project guidance.
+3. If `development.md` is missing or unreadable, stop and ask the user how to proceed.
+4. In the first response, explicitly confirm which `development.md` path was read.
+
+Do not continue with implementation until this step is complete.
+
 # CAE (Content Application Engine)
 
 In CMCC-13 Blueprint projects, the CAE is the server-side rendering tier for
@@ -39,16 +48,6 @@ renders HTML responses through Blueprint view/controller components.
 - Preview app: `mvn spring-boot:run` from `spring-boot/cae-preview-app`
 - Image build: `mvn -Pdefault-image` (optionally `-Djib.goal=build`)
 
-Before doing any analysis, edits, or suggestions, the agent MUST:
-
-1. Locate and read `development.md` in the current workspace (or the path configured by the user).
-2. Treat `development.md` as highest-priority local project guidance.
-3. If `development.md` is missing or unreadable, stop and ask the user how to proceed.
-4. In the first response, explicitly confirm which `development.md` path was read.
-
-Do not continue with implementation until this step is complete.
-
 ## References
 
 - Local spec: `references/specification.md`
-- For any development tasks always read `references/development.md`
