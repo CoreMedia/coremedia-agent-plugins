@@ -34,7 +34,7 @@ clients). It has live and preview variants aligned with editorial workflows.
 
 ## References
 - Local spec: `references/specification.md`
-- Everything related to the headless development `references/development.md`
+- Everything related to headless development: see the `## Development` section below
 
 ## Development
 ### Generic information
