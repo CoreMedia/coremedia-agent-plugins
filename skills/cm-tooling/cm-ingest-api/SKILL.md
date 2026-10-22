@@ -30,6 +30,8 @@ The CMCC ingest-server api is used to:
 - The implementation is supporting multi-environment operations in a single call (bulk).
 - Check if a implementation is located under the folder ".cm-ai/cmcc-ingest-api/implementation"
 - If no implementation is present, generate a client of your choice in the mentioned folder. Always implement all methods.
+- Important, only the client is reading the token. Never pass or hard code the token directly. 
+- Pass only the identifier of the environment, and the client will read the token from the .env file.
 - You are only allowed to use the client to call endpoints.
 - Execute the client and ensure that the client is working as expected.
 - If no environment is mentioned, ask for the environment.

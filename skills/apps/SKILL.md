@@ -15,3 +15,7 @@ description: "Use this skill for the CoreMedia blueprint apps. Below all availab
 - studio-server referenced by `cm-studio-server/SKILL.md`
 - user-changes referenced by `cm-user-changes/SKILL.md`
 - workflow-server referenced by `cm-workflow-server/SKILL.md`
+
+# Implementation
+- Check for each application in the used workspace, if a specific subfolder "specs" is present. 
+- If yes, load a given specification in case the prompt is referring to it.
