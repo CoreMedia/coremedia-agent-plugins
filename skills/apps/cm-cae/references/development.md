@@ -32,7 +32,7 @@ Look at `spring.boot.tomcat.extra-resources` and related `*.resources` propertie
 
 ## 3) Template naming conventions
 
-- Themes are located in the workspace under frontend/themes
+- Themes are located in the workspace under frontend/themes 
 
 Common conventions visible in this workspace:
 
